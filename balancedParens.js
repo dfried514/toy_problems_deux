@@ -24,72 +24,46 @@
  *
  */
 
- // analysis: classic divide and conquor problem
-  // strategy:  start iterating over input from leftStart
-  // if a right paren is found, set balanced to false and return
-  // if a left paren is found, identify its matching right paren, and
-  // start from the rightEnd going backwards to find the matching right paren
-  // if not found, set balanced to false and return,
-  // if found, reset right margin to found matching paren index - 1, start a
-  // new search at matching paren index + 1, and resume current search until
-  // right margin is reached
+ // analysis: obviously involve a stack,
+ // iterate over input, push all left parens onto stack,
+ // as right parens are encountered, pop off left parens from stack,
+ // compare, if they don't match return false
+ // after iteration completes, stack should be empty if all parens match
+
 const balancedParens = input => {
-  let balanced = true;
+  const parensObj = {
+    ')': '(',
+    ']': '[',
+    '}': '{'
+  };
+  const leftParens = ['(', '[', '{'];
+  const rightParens = Object.keys(parensObj);
+  let leftParensStack = [];
+  let index = 0;
 
-  const findBalancedParens = (startIndex, endIndex) => {
-    const parensObj = {
-      '(': ')',
-      '[': ']',
-      '{': '}'
-    };
-    const rightParens = [')', ']', '}'];
-
-    const matchingRightParenIndex = (startIndex, endIndex, rightParen) => {
-      let rightParenIndex = -1;
-      let index = endIndex;
-
-      while (rightParenIndex < 0 && index > startIndex) {
-        console.log('matching', index, input.charAt(index), rightParen);
-        if (input.charAt(index) === rightParen) {
-          rightParenIndex = index;
-        }
-        index--;
-      }
-      return rightParenIndex;
-    };
-
-    let index = startIndex;
-
-    while (balanced && index <= endIndex) {
-      let curChar = input.charAt(index);
-      if (rightParens.includes(curChar) && index !== endIndex) {
-        balanced = false;
-      }
-      if (parensObj.hasOwnProperty(curChar)) {
-        newEndIndex = matchingRightParenIndex(index, endIndex, parensObj[curChar]);
-        console.log('newEndIndex', newEndIndex);
-        if (newEndIndex < 0) {
-          balanced = false;
-        } else {
-          findBalancedParens(newEndIndex + 1, endIndex);
-          endIndex = newEndIndex;
-          index++;
-        }
+  while (index < input.length) {
+    let curChar = input.charAt(index);
+    if (leftParens.includes(curChar)) {
+      leftParensStack.push(curChar);
+    } else if (rightParens.includes(curChar)) {
+      let lastLeftParen = leftParensStack.pop();
+      if (parensObj[curChar] !== lastLeftParen) {
+        return false;
       }
     }
-  };
-  findBalancedParens(0, input.length - 1);
-  return balanced;
+    index++;
+  }
+  return leftParensStack.length === 0;
 };
 
 console.log(balancedParens('('));  // false
 console.log(balancedParens('()')); // true
-// console.log(balancedParens(')('));  // false
-// console.log(balancedParens('(())'));  // true®®
+console.log(balancedParens(')('));  // false
+console.log(balancedParens('(())'));  // true
 
-// console.log(balancedParens('[](){}')); // true
-// console.log(balancedParens('[({})]'));   // true
-// console.log(balancedParens('[(]{)}')); // false
+console.log(balancedParens('[](){}')); // true
+console.log(balancedParens('[({})]'));   // true
+console.log(balancedParens('[(]{)}')); // false
 
-// console.log(balancedParens(' var wow  = { yo: thisIsAwesome() }')); // true
-// console.log(balancedParens(' var hubble = function() { telescopes.awesome();')); // false
+console.log(balancedParens(' var wow  = { yo: thisIsAwesome() }')); // true
+console.log(balancedParens(' var hubble = function() { telescopes.awesome();')); // false
