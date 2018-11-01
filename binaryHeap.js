@@ -1,6 +1,9 @@
+const minComparator = (x, y) => x < y;
+const maxComparator = (x, y) => x > y;
+
 function BinaryHeap () {
   this._heap = [];
-  this._comparator = (x, y) => x < y;
+  this._comparator = minComparator;
   // this compare function will result in a minHeap, use it to make comparisons between nodes in your solution
   this._compare = (i, j, comparator = this._comparator) => comparator(i, j);
 }
@@ -22,11 +25,8 @@ BinaryHeap.prototype.insert = function(value) {
   let child = this._heap.length - 1;
   let parent = this.getParent(child);
 
-  console.log(parent, child);
-  console.log(this._compare(this._heap[parent], this._heap[child]));
-
   while (parent >= 0
-    && !this._compare(this._heap[parent], this._heap[child])) {
+    && this._compare(this._heap[child], this._heap[parent])) {
       [this._heap[parent], this._heap[child]]
         = [this._heap[child], this._heap[parent]];
 
@@ -35,17 +35,46 @@ BinaryHeap.prototype.insert = function(value) {
   }
 }
 
-BinaryHeap.prototype.removeRoot = () => {
+BinaryHeap.prototype.removeRoot = function() {
+  if (this._heap.length === 0) {
+    return null;
+  }
+  if (this._heap.length === 1) {
+    return this._heap.pop();
+  }
+  const max = (a, b) =>
+    this._compare(this._heap[a], this._heap[b])
+      ? a
+      : b;
+
+  [this._heap[0], this._heap[this._heap.length - 1]]
+    = [this._heap[this._heap.length - 1], this._heap[0]];
+
+  const root = this._heap.pop();
+
+  let parent = 0;
+  let maxChild = max(...this.getChildren(parent));
+
+  while (this._heap[maxChild] &&
+    this._compare(this._heap[maxChild], this._heap[parent])) {
+
+      [this._heap[parent], this._heap[maxChild]]
+        = [this._heap[maxChild], this._heap[parent]];
+
+      parent = maxChild;
+      maxChild = max(...this.getChildren(parent));
+  }
+  return root;
 }
 
 var heap = new BinaryHeap();
-heap.insert(10);
-heap.insert(20);
-heap.insert(30);
-heap.insert(40);
-heap.insert(50);
 heap.insert(60);
-console.log(heap);
+heap.insert(50);
+heap.insert(40);
+heap.insert(30);
+heap.insert(20);
+heap.insert(10);
 heap.insert(5);
-console.log(heap);
-console.log(heap.getRoot());
+console.log(heap._heap); // [5, 30, 10, 60, 40, 50, 20]
+console.log(heap.removeRoot()); // 5
+console.log(heap._heap); // [10, 30, 20, 60, 40, 50]
