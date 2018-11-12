@@ -1,20 +1,22 @@
-const myFuncs = (funcs, callback) => {
-  let arr = [];
-  let next = 1;
+const asyncMap = (tasks, callback) => {
+  let results = [];
+  let nextTaskIndex = 1;
 
-  let cb = data => {
-    arr.push(data);
-    let nextFn = funcs[next++];
-    if (nextFn) {
-      nextFn(cb);
+  const cb = data => {
+    results.push(data);
+    let nextTask = tasks[nextTaskIndex++];
+    if (nextTask) {
+      nextTask(cb);
     } else {
-      console.log('arr', arr);
+      callback(results)
     }
   };
-  funcs[0](cb);
+  tasks[0](cb);
 };
 
-let funcs = [
+const callback = arr => console.log('result', arr);
+
+const tasks = [
   function(cb){
     setTimeout(function(){
       cb('one');
@@ -23,13 +25,13 @@ let funcs = [
   function(cb){
     setTimeout(function(){
       cb('two');
+    }, 500);
+  },
+  function(cb){
+    setTimeout(function(){
+      cb('three');
     }, 1000);
   }
 ];
 
-myFuncs(funcs);
-
-const add = (a, b) => a + b;
-
-let add5 = b => add(5, b);
-console.log(add5(4));
+asyncMap(tasks, callback); // ['one', 'two', 'three']
