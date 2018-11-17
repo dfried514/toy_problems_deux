@@ -1,5 +1,5 @@
-var HashTable = function(storageLimit) {
-  this.storageLimit = storageLimit;
+var HashTable = function(size) {
+  this.size = size;
   this.storage = [];
 }
 
@@ -11,7 +11,7 @@ HashTable.prototype.getIndexBelowMaxForKey
         hash = hash & hash; // Convert to 32bit integer
         hash = Math.abs(hash);
       }
-      return hash % this.storageLimit;
+      return hash % this.size;
 };
 
 HashTable.prototype.insert = function(key, val) {
